@@ -76,8 +76,8 @@ class Twitter(object):
 if __name__ == '__main__':
 
     # configure Twitter object
-    API_key = 'L52YxITUZVmacblf8wtWikKGg'
-    API_secret_key = 'J3VngFxcZwyIvp4MzB0wReEXsb2NvppDmsbcJ2YE7lzUzzEFkj'
+    API_key = 'Nope'  # use ur key
+    API_secret_key = 'Maybe next time'  # use ur key
     Twitter_obj = Twitter(API_key, API_secret_key)
 
     # get latest reply to Trump from the user - 'itsJeffTiedrich'
