@@ -1,6 +1,6 @@
 from requests_oauthlib import OAuth1Session
 import time
-
+import os
 
 class Twitter(object):
 
@@ -76,8 +76,9 @@ class Twitter(object):
 if __name__ == '__main__':
 
     # configure Twitter object
-    API_key = 'Nope'  # use ur key
-    API_secret_key = 'Maybe next time'  # use ur key
+    API_key = os.environ.get('API_KEY_TWITTER')
+
+    API_secret_key = os.environ.get('TWITTER_SECRET_KEY')
     Twitter_obj = Twitter(API_key, API_secret_key)
 
     # get latest reply to Trump from the user - 'itsJeffTiedrich'
@@ -87,8 +88,12 @@ if __name__ == '__main__':
     print(latest_reply)
     while True:
         reply = Twitter_obj.find_reply_to(from_user, to_user)
-        if reply['id'] != latest_reply['id']:
-            Twitter_obj.reply_to_reply(reply['id_str'], 'U R A BOT', 'media/trump_tweeted_starter_kit.jpg')
-            print('replied :)')
-            latest_reply = reply
+        if type(reply) == dict:
+            if reply['id'] != latest_reply['id']:
+                Twitter_obj.reply_to_reply(reply['id_str'], 'U R A BOT', 'media/trump_tweeted_starter_kit.jpg')
+                print('replied :)')
+                latest_reply = reply
+        else:
+            print(reply.status_code)
+            print(reply.json())
         time.sleep(5)
