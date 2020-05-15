@@ -4,42 +4,38 @@ import os
 
 class Twitter(object):
 
-    def __init__(self, key, secret_key):
+    def __init__(self, key, secret_key, resource_owner_key=None, resource_owner_secret=None):
         self.key = key
         self.secret_key = secret_key
+        self.resource_owner_key = resource_owner_key
+        self.resource_owner_secret = resource_owner_secret
+        self.verifier = None
         self.oauth = self.authenticate()
 
     def authenticate(self):
-        # Get request token
-        request_token_url = "https://api.twitter.com/oauth/request_token"
-        oauth = OAuth1Session(self.key, client_secret=self.secret_key)
-        fetch_response = oauth.fetch_request_token(request_token_url)
-        resource_owner_key = fetch_response.get('oauth_token')
-        resource_owner_secret = fetch_response.get('oauth_token_secret')
-        print("Got OAuth token: %s" % resource_owner_key)
+        if None in [self.resource_owner_key, self.resource_owner_secret]:
 
-        # # Get authorization
-        base_authorization_url = 'https://api.twitter.com/oauth/authorize'
-        authorization_url = oauth.authorization_url(base_authorization_url)
-        print('Please go here and authorize: %s' % authorization_url)
-        verifier = input('Paste the PIN here: ')
+            # Get request token
+            request_token_url = "https://api.twitter.com/oauth/request_token"
+            oauth = OAuth1Session(self.key, client_secret=self.secret_key)
+            fetch_response = oauth.fetch_request_token(request_token_url)
+            self.resource_owner_key = fetch_response.get('oauth_token')
+            self.resource_owner_secret = fetch_response.get('oauth_token_secret')
+            print("Got OAuth token: %s" % resource_owner_key)
 
-        # # Get the access token
-        access_token_url = 'https://api.twitter.com/oauth/access_token'
+            # Get authorization
+            base_authorization_url = 'https://api.twitter.com/oauth/authorize'
+            authorization_url = oauth.authorization_url(base_authorization_url)
+            print('Please go here and authorize: %s' % authorization_url)
+            self.verifier = input('Paste the PIN here: ')
+
         oauth = OAuth1Session(self.key,
                               client_secret=self.secret_key,
-                              resource_owner_key=resource_owner_key,
-                              resource_owner_secret=resource_owner_secret,
-                              verifier=verifier)
-        oauth_tokens = oauth.fetch_access_token(access_token_url)
+                              resource_owner_key=self.resource_owner_key,
+                              resource_owner_secret=self.resource_owner_secret,
+                              verifier=self.verifier)
 
-        access_token = oauth_tokens['oauth_token']
-        access_token_secret = oauth_tokens['oauth_token_secret']
-
-        return OAuth1Session(self.key,
-                             client_secret=self.secret_key,
-                             resource_owner_key=access_token,
-                             resource_owner_secret=access_token_secret)
+        return oauth
 
     def find_reply_to(self, screen_name_of_reply, author_of_tweet):
         response = self.oauth.get(
@@ -78,9 +74,11 @@ if __name__ == '__main__':
 
     # configure Twitter object
     API_key = os.environ.get('API_KEY_TWITTER')
-
     API_secret_key = os.environ.get('TWITTER_SECRET_KEY')
-    Twitter_obj = Twitter(API_key, API_secret_key)
+    resource_owner_key = os.environ.get('resource_owner_key')
+    resource_owner_secret = os.environ.get('resource_owner_secret')
+
+    Twitter_obj = Twitter(API_key, API_secret_key, resource_owner_key, resource_owner_secret)
 
     # get latest reply to Trump from the user - 'itsJeffTiedrich'
     from_user = 'itsJeffTiedrich'
