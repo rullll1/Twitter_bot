@@ -49,6 +49,7 @@ class Twitter(object):
             for tweet in resp_dict:
                 if tweet['in_reply_to_screen_name'] == author_of_tweet:
                     return tweet
+        return response
 
     def reply_to_reply(self, status_id, status, media=''):
 
